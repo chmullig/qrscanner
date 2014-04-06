@@ -10,11 +10,15 @@ from pymongo import MongoClient
 from bson.binary import Binary
 import socket
 
-mongo_client = MongoClient()
+mongo_client = MongoClient(host="162.243.43.38")
 db = mongo_client.pix
 coll = db.pictures
 
 vc = cv2.VideoCapture(0)
+
+#ip = socket.gethostbyname(socket.gethostname())
+ip = "162.243.43.38"
+port = "80"
 
 class StupidApp():
     def __init__(self):
@@ -55,7 +59,7 @@ class StupidApp():
         self.take_photo(self.now)
         self.now = time.strftime("%Y-%m-%d-%H-%M-%S")
        
-        url = "http://%s:5000/qr/%s" % (socket.gethostbyname(socket.gethostname()), self.now)
+        url = "http://%s:%s/qr/%s" % (ip, port, self.now)
         self.img = qrcode.make(data=url)
         self.tkimage = ImageTk.PhotoImage(self.img)
 

@@ -20,11 +20,11 @@ tclient = pytumblr.TumblrRestClient(
   '8emSmQ98bCuTSchGpNfwV0AbY0t5DQ7BjGxANImWTmID422qhV',
   'd9KYyL99stpokakHNu2DIKbKKDUkc3jkwBrpphl6WpuQZIdNEm'
 )
-blogname = "chmullig.tumblr.com"
+blogname = "qrscanner.tumblr.com"
 
 @app.route('/')
 def hello_world():
-    return 'Hello World!'
+    return redirect("http://%s" % (blogname)
 
 @app.route('/qr/<when>')
 def qr(when):
