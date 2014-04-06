@@ -6,6 +6,13 @@ import time
 import cv2
 import sys, os
 from cStringIO import StringIO
+from pymongo import MongoClient
+from bson.binary import Binary
+import socket
+
+mongo_client = MongoClient()
+db = mongo_client.pix
+coll = db.pictures
 
 vc = cv2.VideoCapture(0)
 
@@ -31,25 +38,26 @@ class StupidApp():
 
     def add_frame(self):
         rval, frame = vc.read()
-        img = Image.fromarray(frame)#, "RGB")#.convert('P', palette=Image.ADAPTIVE)
+        img = Image.fromarray(frame)
         self.frames.append(img)
         self.root.after(100, self.add_frame)
 
 
     def take_photo(self, time):
         rval, frame = vc.read()
-        img = Image.fromarray(frame, "RGB")
-        #fp = String()
-        img.save(time + ".jpg")
+        img = Image.fromarray(frame)
+        fp = StringIO()
+        img.save(fp, format="JPEG")
+        coll.insert({"time" : time, "picture" : Binary(fp.getvalue())})
 
 
     def update_code(self):
         self.take_photo(self.now)
-        self.now = time.strftime("%H-%M-%S")
-        
-        self.img = qrcode.make(data=self.now)
+        self.now = time.strftime("%Y-%m-%d-%H-%M-%S")
+       
+        url = "http://%s:5000/qr/%s" % (socket.gethostbyname(socket.gethostname()), self.now)
+        self.img = qrcode.make(data=url)
         self.tkimage = ImageTk.PhotoImage(self.img)
-        self.img.save("code.png")
 
         self.root.geometry('%dx%d' % (self.img.size[0], self.img.size[1]))
         self.tkimage = ImageTk.PhotoImage(self.img)
@@ -57,6 +65,6 @@ class StupidApp():
         self.label_image.pack()
 
         #self.root.after(100, self.add_frame)
-        self.root.after(1000, self.update_code)
+        self.root.after(5000, self.update_code)
 
 app = StupidApp()
